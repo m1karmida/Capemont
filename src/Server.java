@@ -9,6 +9,7 @@ public class Server {
         Socket clientSocket = new Socket() ;
         PrintWriter out ;
         BufferedReader in ;
+        ObjectOutputStream obj_out ;
 
         DBConnectorPostgres db = new DBConnectorPostgres() ;
 
@@ -16,6 +17,7 @@ public class Server {
         while ( true ) {
             clientSocket = serverSocket.accept() ;
             out = new PrintWriter(clientSocket.getOutputStream(), true);
+            obj_out = new ObjectOutputStream(clientSocket.getOutputStream()) ;
             in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
             String cmd = in.readLine() ;
             String[] split = cmd.split(" ") ;
@@ -36,6 +38,23 @@ public class Server {
                     out.println("LA REGISTRAZIONE NON E' ANDATA A BUON FINE") ;
                 }
             }
+
+            else if ( split[0].equals("GETLISTAPRODOTTI")) {
+
+                System.out.println("GET LISTA PRODOTTI") ;
+                obj_out.writeObject(db.getListaProdotti()) ;
+
+            }
+
+            else if ( split[0].equals("INSERISCIPRODOTTO")) {
+
+                System.out.println("INSERIMENTO PRODOTTO") ;
+                boolean ret = db.inserisciProdotto(split[1],split[2],Integer.parseInt(split[3]),Float.parseFloat(split[4]),Integer.parseInt(split[5]),Boolean.parseBoolean(split[6])) ;
+                if (ret) out.println("PRODOTTO INSERITO");
+                else out.println("PRODOTTO NON INSERITO") ;
+
+            }
+
         }
     }
 }
